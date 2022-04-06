@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include <Components/Widget.h>
+#include "PingPongBall.h"
 #include "PingPongPlayerController.generated.h"
 
 class APingPongPlatform;
@@ -24,14 +26,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<APingPongPlatform> PlatformClass;
 
-	UPROPERTY()
-	APingPongPlatform* Platform;
 
 
 public:
 
 
 	APingPongPlayerController();
+
+	UPROPERTY()
+	APingPongPlatform* Platform;
+
+	UPROPERTY()
+	APingPongBall* Ball;
 
 	UFUNCTION()
 	void SetStartTransform(FTransform NewStartTransform);
@@ -51,10 +57,14 @@ protected:
 	UFUNCTION()
 	void RotateRight(float AxisValue);
 
+	UFUNCTION()
+	void Fire();
+
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_PlatformMoveRight(float AxisValue);
 
 	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_PlatformRotateRight(float AxisValue);
 
+	virtual void BeginPlay() override;
 };

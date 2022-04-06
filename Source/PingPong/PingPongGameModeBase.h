@@ -7,6 +7,7 @@
 #include "PingPongGameModeBase.generated.h"
 
 class APingPongGate;
+class APingPongPlatform;
 class APingPongPlayerStart;
 class APingPongPlayerController;
 
@@ -20,10 +21,10 @@ class PINGPONG_API APingPongGameModeBase : public AGameModeBase
 
 protected:
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	APingPongPlayerController* Player1 = NULL;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	APingPongPlayerController* Player2 = NULL;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -33,12 +34,29 @@ protected:
 	APingPongPlayerStart* Player2Start;
 
 	UFUNCTION(BlueprintCallable)
-	void AddScore(APingPongPlayerController* Player, float Score);
+	void AddScore(FString Player, float Score);
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FScoreChanged, float, Player1Score, float, Player2Score);
+	UPROPERTY(BlueprintAssignable)
+	FScoreChanged OnScoreChanged;
+
 
 public:
 
 	APingPongGameModeBase();
-	
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
+	FString Player1Name;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite)
+	FString Player2Name;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APingPongPlatform* Player1Plat;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APingPongPlatform* Player2Plat;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	float Player1Score = 0;
 
@@ -57,4 +75,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SpawnCoin();
 
+	virtual void Tick(float DeltaTime) override;
 };

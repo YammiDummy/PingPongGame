@@ -5,6 +5,8 @@
 #include <Components/BoxComponent.h>
 #include <Components/StaticMeshComponent.h>
 #include "PingPongBall.h"
+#include "PingPongGameModeBase.h"
+#include "PingPongPlatform.h"
 
 // Sets default values
 APingPongGate::APingPongGate()
@@ -22,6 +24,8 @@ APingPongGate::APingPongGate()
 	SetReplicates(true);
 
 	BodyCollision->OnComponentBeginOverlap.AddDynamic(this, &APingPongGate::BroadcastToGameMode);
+
+
 }
 
 void APingPongGate::BroadcastToGameMode(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -34,7 +38,25 @@ void APingPongGate::BroadcastToGameMode(UPrimitiveComponent* OverlappedComponent
 
 			OnHit.Broadcast(Player, Ball->Score);
 			Ball->Score = 1;
+			Ball->StopMove();
 		}
+
+		APingPongGameModeBase* GameMode = Cast<APingPongGameModeBase>(GetWorld()->GetAuthGameMode());
+		if (GameMode)
+		{
+			if (GameMode->Player1Name == Player)
+			{
+				GameMode->Player1Plat->Ball = Ball;
+				GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Green, TEXT("Succes 1"));
+			}
+			else if (GameMode->Player2Name == Player)
+			{
+				GameMode->Player2Plat->Ball = Ball;
+				GEngine->AddOnScreenDebugMessage(1, 3, FColor::Green, FString::Printf(TEXT("%s"), *GameMode->Player2Plat->Ball->GetName()));
+				GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Green, TEXT("Succes 2"));
+			}
+		}
+
 	}
 }
 

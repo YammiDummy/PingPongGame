@@ -33,5 +33,6 @@ void APingPongCoin::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	SetActorRotation(GetActorRotation() + FRotator(0, 1, 0));
 }
 

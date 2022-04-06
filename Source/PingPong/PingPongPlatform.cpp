@@ -5,6 +5,8 @@
 #include <Components/BoxComponent.h>
 #include <Components/StaticMeshComponent.h>
 #include <Kismet/KismetMathLibrary.h>
+#include "PingPongGameModeBase.h"
+#include <Net/UnrealNetwork.h>
 
 // Sets default values
 APingPongPlatform::APingPongPlatform()
@@ -27,7 +29,7 @@ APingPongPlatform::APingPongPlatform()
 void APingPongPlatform::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -52,26 +54,20 @@ void APingPongPlatform::Server_MoveRight_Implementation(float AxisValue)
 	FVector CurrentLocation = GetActorLocation();
 	FVector NextLocation = GetActorLocation() + GetActorRightVector() * MoveSpeed * AxisValue;
 
+
+	if (Ball && !Ball->IsMoving)
+	{
+		Ball->SetActorLocation(BodyMesh->GetComponentLocation() + BodyMesh->GetForwardVector() * 100);
+		Ball->SetActorRotation(BodyMesh->GetComponentRotation());
+	}
+
 	if(!SetActorLocation(NextLocation, true))
 	{
 		SetActorLocation(CurrentLocation);
-	}
-}
- 
-void APingPongPlatform::Server_RotateRight_Implementation(float AxisValue)
-{
-	FRotator CurrentRotation = BodyMesh->GetComponentRotation();
-	GEngine->AddOnScreenDebugMessage(1, 5, FColor::Red, FString::Printf(TEXT("y: %f"), FVector::DotProduct(BodyMesh->GetForwardVector(), GetActorForwardVector())), true);
 
-	FRotator NewRotation(0, 0, 0);
-	NewRotation.Yaw = CurrentRotation.Yaw + AxisValue;
-	if (FVector::DotProduct(BodyMesh->GetForwardVector(), GetActorForwardVector()) > 0.8)
-	{
-
-		BodyMesh->SetWorldRotation(NewRotation);
-		if (FVector::DotProduct(BodyMesh->GetForwardVector(), GetActorForwardVector()) < 0.8)
+		if (Ball && !Ball->IsMoving)
 		{
-			BodyMesh->SetWorldRotation(CurrentRotation);
+			Ball->SetActorLocation(CurrentLocation);
 		}
 	}
 }
@@ -80,4 +76,50 @@ bool APingPongPlatform::Server_RotateRight_Validate(float AxisValue)
 {
 	return true;
 }
+ 
+void APingPongPlatform::Server_RotateRight_Implementation(float AxisValue)
+{
+	FRotator CurrentRotation = BodyMesh->GetComponentRotation();
+	//GEngine->AddOnScreenDebugMessage(1, 5, FColor::Red, FString::Printf(TEXT("%s"), *ControllerName));
 
+	FRotator NewRotation(0, 0, 0);
+	NewRotation.Yaw = CurrentRotation.Yaw + AxisValue;
+	if (FVector::DotProduct(BodyMesh->GetForwardVector(), GetActorForwardVector()) > 0.8)
+	{
+
+		BodyMesh->SetWorldRotation(NewRotation);
+
+		if (Ball && !Ball->IsMoving)
+		{
+			FVector CurrentLocation = BodyMesh->GetComponentLocation();
+			Ball->SetActorLocation(CurrentLocation + BodyMesh->GetForwardVector() * 100);
+			Ball->SetActorRotation(NewRotation);
+		}
+		if (FVector::DotProduct(BodyMesh->GetForwardVector(), GetActorForwardVector()) < 0.8)
+		{
+			BodyMesh->SetWorldRotation(CurrentRotation);
+		}
+
+		//GEngine->AddOnScreenDebugMessage(1, 3, FColor::Green, TEXT("test"));
+	}
+}
+
+void APingPongPlatform::Fire()
+{
+	GEngine->AddOnScreenDebugMessage(1, 3, FColor::Red, FString::Printf(TEXT("%s"), *GetName()));
+	//if (Ball)
+	//{
+	//	Ball->IsMoving = true;
+	//	//APingPongGameModeBase* GameMode = Cast<APingPongGameModeBase>(GetWorld()->GetAuthGameMode());
+	//	//Ball->ChangeColor(this);
+	//	Ball = NULL;
+	//}
+
+}
+
+void APingPongPlatform::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(APingPongPlatform, Ball);
+}

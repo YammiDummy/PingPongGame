@@ -12,13 +12,6 @@ class PINGPONG_API APingPongGate : public AActor
 {
 	GENERATED_BODY()
 
-public:
-
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
-	class APingPongPlayerController* Player;
-
-
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Components")
@@ -31,7 +24,10 @@ public:
 	// Sets default values for this actor's properties
 	APingPongGate();
 
-	DECLARE_EVENT_TwoParams(APingPongGate, FOnHit, APingPongPlayerController*, float)
+	UPROPERTY()
+	FString Player;
+
+	DECLARE_EVENT_TwoParams(APingPongGate, FOnHit, FString, float)
 	FOnHit OnHit;
 
 	UFUNCTION()

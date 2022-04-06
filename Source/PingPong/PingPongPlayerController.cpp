@@ -3,6 +3,8 @@
 
 #include "PingPongPlayerController.h"
 #include "PingPongPlatform.h"
+#include "PingPongGameModeBase.h"
+#include <Kismet/GameplayStatics.h>
 
 APingPongPlayerController::APingPongPlayerController()
 {
@@ -19,6 +21,7 @@ void APingPongPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 	InputComponent->BindAxis("Move", this, &APingPongPlayerController::MoveRight);
 	InputComponent->BindAxis("Rotate", this, &APingPongPlayerController::RotateRight);
+	InputComponent->BindAction("Fire", IE_Pressed, this, &APingPongPlayerController::Fire);
 }
 
 void APingPongPlayerController::MoveRight(float AxisValue)
@@ -81,6 +84,7 @@ void APingPongPlayerController::SpawnPlatform_Implementation(TSubclassOf<APingPo
 	{
 		Platform->SetActorLocation(StartTransform.GetLocation());
 		Platform->SetActorRotation(StartTransform.GetRotation());
+		Platform->ControllerName = GetName();
 	}
 }
 
@@ -89,6 +93,15 @@ void APingPongPlayerController::RotateRight(float AxisValue)
 	if (AxisValue != 0)
 	{
 		Server_PlatformRotateRight(AxisValue);
+	}
+}
+
+void APingPongPlayerController::Fire()
+{
+	if (Cast<APingPongGameModeBase>(GetWorld()->GetAuthGameMode())->Player1Name == GetName())
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, FString::Printf(TEXT("TEST")));
+		//Platform->Ball->IsMoving;
 	}
 }
 
@@ -115,4 +128,12 @@ bool APingPongPlayerController::Server_PlatformRotateRight_Validate(float AxisVa
 	return true;
 }
 
+void APingPongPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APingPongBall::StaticClass(), FoundActors);
+	Ball = (APingPongBall*)FoundActors[0];
+}
 

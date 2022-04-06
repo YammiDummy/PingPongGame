@@ -3,12 +3,14 @@
 
 #include "PingPongGameModeBase.h"
 
-#include "PingPongPlayerPawn.h"
-#include "PingPongPlayerController.h"
-#include <Kismet/GameplayStatics.h>
 #include "PingPongGate.h"
-#include <Components/BoxComponent.h>
+#include "PingPongPlatform.h"
+#include "PingPongPlayerPawn.h"
 #include "PingPongPlayerStart.h"
+#include "PingPongPlayerController.h"
+#include <Components/BoxComponent.h>
+#include <Kismet/GameplayStatics.h>
+#include <Components/InputComponent.h>
 
 APingPongGameModeBase::APingPongGameModeBase()
 {
@@ -24,22 +26,27 @@ void APingPongGameModeBase::BeginPlay()
 
 }
 
-void APingPongGameModeBase::AddScore(APingPongPlayerController* Player, float Score)
+void APingPongGameModeBase::AddScore(FString Player, float Score)
 {
-	if (Cast<APingPongPlayerController>(Player))
+	if (*Player)
 	{
-		if (Player == Player1)
+		//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%s"), *Player));
+		//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%s"), *Player1->GetName()));
+		//GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%s"), *Player2->GetName()));
+
+		if (Player == Player1Name)
 		{
 			Player2Score += Score;
+			OnScoreChanged.Broadcast(Player1Score, Player2Score);
 		}
 
-		if (Player == Player2)
+		else if (Player == Player2Name)
 		{
 			Player1Score += Score;
+			OnScoreChanged.Broadcast(Player1Score, Player2Score);
 		}
 	}
 }
-
 
 void APingPongGameModeBase::PostLogin(APlayerController* NewPlayer)
 {
@@ -71,10 +78,11 @@ void APingPongGameModeBase::PostLogin(APlayerController* NewPlayer)
 		Player1 = (APingPongPlayerController*)NewPlayer;
 		CurrentPlayer = Player1;
 		StartPosition = Player1Start;
+		Player1Name = Player1->GetName();
 
 		if (StartPosition->PingPongGate)
-		{
-			StartPosition->PingPongGate->Player = CurrentPlayer;
+		{		
+			StartPosition->PingPongGate->Player = CurrentPlayer->GetName();
 			StartPosition->PingPongGate->OnHit.AddUObject(this, &APingPongGameModeBase::AddScore);
 		}
 		UE_LOG(LogTemp, Warning, TEXT("PingPongGameMode: Init player 1"));
@@ -85,10 +93,11 @@ void APingPongGameModeBase::PostLogin(APlayerController* NewPlayer)
 		Player2 = (APingPongPlayerController*)NewPlayer;
 		CurrentPlayer = Player2;
 		StartPosition = Player2Start;
+		Player2Name = Player2->GetName();
 
 		if (StartPosition->PingPongGate)
 		{
-			StartPosition->PingPongGate->Player = CurrentPlayer;
+			StartPosition->PingPongGate->Player = CurrentPlayer->GetName();
 			StartPosition->PingPongGate->OnHit.AddUObject(this, &APingPongGameModeBase::AddScore);
 		}
 		UE_LOG(LogTemp, Warning, TEXT("PingPongGameMode: Init player 2"));
@@ -114,6 +123,18 @@ void APingPongGameModeBase::PostLogin(APlayerController* NewPlayer)
 		NewPlayer->SetPawn(NewPawn);
 		CurrentPlayer->SetStartTransform(StartPosition->GetActorTransform());
 		CurrentPlayer->Initialize();
+
+		if (Player1 == CurrentPlayer)
+		{
+			Player1Plat = CurrentPlayer->Platform;
+		}
+		else if (Player2 == CurrentPlayer)
+		{
+			Player2Plat = CurrentPlayer->Platform;
+
+			GEngine->AddOnScreenDebugMessage(-1, 3, FColor::Red, FString::Printf(TEXT("test %s"), *Player2Plat->GetName()));
+		}
+
 	}
 
 	else
@@ -125,4 +146,9 @@ void APingPongGameModeBase::PostLogin(APlayerController* NewPlayer)
 void APingPongGameModeBase::SpawnCoin()
 {
 	//GetWorld()->SpawnActor()
+}
+
+void APingPongGameModeBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }

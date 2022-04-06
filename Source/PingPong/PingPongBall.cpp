@@ -10,6 +10,8 @@
 #include <Components/StaticMeshComponent.h>
 #include <Net/UnrealNetwork.h>
 #include "PingPongGate.h"
+#include "PingPongPlayerController.h"
+#include "PingPongPlatform.h"
 
 // Sets default values
 APingPongBall::APingPongBall()
@@ -57,6 +59,11 @@ void APingPongBall::StopMove()
 	Server_StopMove();
 }
 
+void APingPongBall::ChangeColor(APingPongPlatform* Platform)
+{
+	Multicast_ChangeColor(Platform);
+}
+
 void APingPongBall::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -71,6 +78,8 @@ bool APingPongBall::Server_Move_Validate(float DeltaTime)
 
 void APingPongBall::Server_Move_Implementation(float DeltaTime)
 {
+	if(IsMoving)
+	{
 	FVector ForwardVector = GetActorForwardVector();
 	FVector CurrentLocation = GetActorLocation();
 	FVector NewLocation = CurrentLocation + ForwardVector * MoveSpeed * DeltaTime;
@@ -101,7 +110,17 @@ void APingPongBall::Server_Move_Implementation(float DeltaTime)
 		Score++;
 		MoveSpeed += 30;
 
+		//Collision();
+
 		Multicast_HitEffect();
+		APingPongPlatform* OverlappedPlatform = Cast<APingPongPlatform>(HitResult.Actor);
+		if (OverlappedPlatform)
+		{
+			BouncedPlayer = (*Cast<APingPongPlatform>(HitResult.Actor)).ControllerName;
+			GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, FString::Printf(TEXT("%s"), *BouncedPlayer));
+			ChangeColor(OverlappedPlatform);
+		}
+	}
 	}
 }
 
@@ -125,6 +144,17 @@ void APingPongBall::Server_StopMove_Implementation()
 	IsMoving = false;
 }
 
+void APingPongBall::Multicast_ChangeColor_Implementation(APingPongPlatform* Platform)
+{
+
+	BodyMesh->SetMaterial(0, Platform->BodyMesh->GetMaterial(0));
+}
+
+bool APingPongBall::Multicast_ChangeColor_Validate(APingPongPlatform* Platform)
+{
+	return true;
+}
+
 void APingPongBall::Multicast_HitEffect_Implementation()
 {
 	UWorld* World = GetWorld();
@@ -133,3 +163,7 @@ void APingPongBall::Multicast_HitEffect_Implementation()
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitEffect, GetActorLocation());
 	}
 }
+
+//void APingPongBall::Collision()
+//{
+//}
