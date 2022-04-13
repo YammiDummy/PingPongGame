@@ -11,6 +11,7 @@
 #include <Components/BoxComponent.h>
 #include <Kismet/GameplayStatics.h>
 #include <Components/InputComponent.h>
+#include <Net/UnrealNetwork.h>
 
 APingPongGameModeBase::APingPongGameModeBase()
 {
@@ -141,14 +142,4 @@ void APingPongGameModeBase::PostLogin(APlayerController* NewPlayer)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Start position not setted in PingPongGameMode!"));
 	}
-}
-
-void APingPongGameModeBase::SpawnCoin()
-{
-	//GetWorld()->SpawnActor()
-}
-
-void APingPongGameModeBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }

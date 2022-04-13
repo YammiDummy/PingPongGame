@@ -17,9 +17,6 @@ protected:
 	class USphereComponent* BodyCollision;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ball Params")
-	float MoveSpeed = 100;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ball Params")
 	class UParticleSystem* HitEffect;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
@@ -31,6 +28,9 @@ public:
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "Components")
 	class UStaticMeshComponent* BodyMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ball Params")
+	float MoveSpeed = 100;
 
 protected:
 	// Called when the game starts or when spawned

@@ -80,47 +80,47 @@ void APingPongBall::Server_Move_Implementation(float DeltaTime)
 {
 	if(IsMoving)
 	{
-	FVector ForwardVector = GetActorForwardVector();
-	FVector CurrentLocation = GetActorLocation();
-	FVector NewLocation = CurrentLocation + ForwardVector * MoveSpeed * DeltaTime;
+		FVector ForwardVector = GetActorForwardVector();
+		FVector CurrentLocation = GetActorLocation();
+		FVector NewLocation = CurrentLocation + ForwardVector * MoveSpeed * DeltaTime;
 
-	FHitResult HitResult;
-	if (!SetActorLocation(NewLocation, true, &HitResult) && HitResult.GetActor())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Ball %s Collided with %s"), *GetName(), *HitResult.GetActor()->GetName());
-
-		FVector MoveVector = ForwardVector.MirrorByVector(HitResult.ImpactNormal);
-
-		FVector ResetPosition = CurrentLocation - ForwardVector.MirrorByVector(HitResult.ImpactNormal);
-		DrawDebugDirectionalArrow(GetWorld(), CurrentLocation, CurrentLocation + ForwardVector, 30, FColor::Yellow, true, 3.f, 0, 3);
-
-		FVector ImpactCorrection = HitResult.ImpactPoint + HitResult.ImpactNormal * 300;
-		DrawDebugDirectionalArrow(GetWorld(), HitResult.ImpactPoint, ImpactCorrection, 30, FColor::Blue, true, 3, 0, 3);
-
-		FVector NewTargetMove = ResetPosition + MoveVector * 300;
-		NewTargetMove.Z = CurrentLocation.Z;
-		DrawDebugDirectionalArrow(GetWorld(), ResetPosition, ResetPosition + MoveVector * 300, 30, FColor::Green, true, 3.f, 0, 3);
-
-		SetActorLocation(ResetPosition);
-		FRotator CurrentRotation = GetActorRotation();
-		FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(CurrentLocation, NewTargetMove);
-		NewRotation.Pitch = CurrentRotation.Pitch;
-		SetActorRotation(NewRotation);
-
-		Score++;
-		MoveSpeed += 30;
-
-		//Collision();
-
-		Multicast_HitEffect();
-		APingPongPlatform* OverlappedPlatform = Cast<APingPongPlatform>(HitResult.Actor);
-		if (OverlappedPlatform)
+		FHitResult HitResult;
+		if (!SetActorLocation(NewLocation, true, &HitResult) && HitResult.GetActor())
 		{
-			BouncedPlayer = (*Cast<APingPongPlatform>(HitResult.Actor)).ControllerName;
-			GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, FString::Printf(TEXT("%s"), *BouncedPlayer));
-			ChangeColor(OverlappedPlatform);
+			UE_LOG(LogTemp, Warning, TEXT("Ball %s Collided with %s"), *GetName(), *HitResult.GetActor()->GetName());
+
+			FVector MoveVector = ForwardVector.MirrorByVector(HitResult.ImpactNormal);
+
+			FVector ResetPosition = CurrentLocation - ForwardVector.MirrorByVector(HitResult.ImpactNormal);
+			DrawDebugDirectionalArrow(GetWorld(), CurrentLocation, CurrentLocation + ForwardVector, 30, FColor::Yellow, true, 3.f, 0, 3);
+
+			FVector ImpactCorrection = HitResult.ImpactPoint + HitResult.ImpactNormal * 300;
+			DrawDebugDirectionalArrow(GetWorld(), HitResult.ImpactPoint, ImpactCorrection, 30, FColor::Blue, true, 3, 0, 3);
+
+			FVector NewTargetMove = ResetPosition + MoveVector * 300;
+			NewTargetMove.Z = CurrentLocation.Z;
+			DrawDebugDirectionalArrow(GetWorld(), ResetPosition, ResetPosition + MoveVector * 300, 30, FColor::Green, true, 3.f, 0, 3);
+
+			SetActorLocation(ResetPosition);
+			FRotator CurrentRotation = GetActorRotation();
+			FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(CurrentLocation, NewTargetMove);
+			NewRotation.Pitch = CurrentRotation.Pitch;
+			SetActorRotation(NewRotation);
+
+			Score++;
+			MoveSpeed += 20;
+
+			//Collision();
+
+			Multicast_HitEffect();
+			APingPongPlatform* OverlappedPlatform = Cast<APingPongPlatform>(HitResult.Actor);
+			if (OverlappedPlatform)
+			{
+				BouncedPlayer = (*Cast<APingPongPlatform>(HitResult.Actor)).ControllerName;
+				GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, FString::Printf(TEXT("%s"), *BouncedPlayer));
+				ChangeColor(OverlappedPlatform);
+			}
 		}
-	}
 	}
 }
 

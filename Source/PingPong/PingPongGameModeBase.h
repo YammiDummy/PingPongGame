@@ -71,9 +71,4 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void PostLogin(APlayerController* NewPlayer) override;
-
-	UFUNCTION(BlueprintCallable)
-	void SpawnCoin();
-
-	virtual void Tick(float DeltaTime) override;
 };

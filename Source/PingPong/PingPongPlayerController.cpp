@@ -98,11 +98,29 @@ void APingPongPlayerController::RotateRight(float AxisValue)
 
 void APingPongPlayerController::Fire()
 {
-	if (Cast<APingPongGameModeBase>(GetWorld()->GetAuthGameMode())->Player1Name == GetName())
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, FString::Printf(TEXT("TEST")));
-		//Platform->Ball->IsMoving;
+	Server_Fire();
+}
+
+void APingPongPlayerController::Server_Fire_Implementation()
+{
+	if (Platform && Platform->Ball)																		//ѕроблема была в этом месте. ≈сли € пишу этот код через обычный метод Fire, то Platform NULLPTR.
+	{																									//Ќо если € использую RPC Server_Fire, то все работает исправно, платформа, как и в методе 
+		GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, FString::Printf(TEXT("TEST")));			//ServerPlatformMove_Right на месте и не равна NULLPTR. ѕочему это так работает?
+		Platform->Ball->IsMoving = true;																//¬се это справедливо дл€ второго PlayerController, первый при любом раскладе работает исправно.
+		Platform->Ball->MoveSpeed = 500;
+		Platform->Ball = NULL;
 	}
+
+	//if (Cast<APingPongGameModeBase>(GetWorld()->GetAuthGameMode())->Player1Name == GetName())
+	//{
+	//	GEngine->AddOnScreenDebugMessage(-1, 2, FColor::Green, FString::Printf(TEXT("TEST 2")));
+	//	Platform->Ball->IsMoving;
+	//}
+}
+
+bool APingPongPlayerController::Server_Fire_Validate()
+{
+	return true;
 }
 
 void APingPongPlayerController::Server_PlatformRotateRight_Implementation(float AxisValue)

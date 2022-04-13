@@ -61,6 +61,9 @@ protected:
 	void Fire();
 
 	UFUNCTION(Server, Reliable, WithValidation)
+	void Server_Fire();
+
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_PlatformMoveRight(float AxisValue);
 
 	UFUNCTION(Server, Reliable, WithValidation)

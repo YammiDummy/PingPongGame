@@ -67,7 +67,7 @@ void APingPongPlatform::Server_MoveRight_Implementation(float AxisValue)
 
 		if (Ball && !Ball->IsMoving)
 		{
-			Ball->SetActorLocation(CurrentLocation);
+			Ball->SetActorLocation(BodyMesh->GetComponentLocation() + BodyMesh->GetForwardVector() * 100);
 		}
 	}
 }
